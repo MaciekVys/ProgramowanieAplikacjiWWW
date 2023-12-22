@@ -1,0 +1,13 @@
+body
+{
+    background-color: #eee;
+    width: 100%;
+    justify-content: space-around;
+}
+#container{
+    width: 100%;
+}
+.left-side{
+    width: 50%;
+    background-color: aqua;
+}
