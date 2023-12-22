@@ -1,0 +1,280 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    box-sizing: border-box;
+}
+body
+{   
+    background-color: #7a7a7a;
+}
+.container{
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.header{
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    text-align: left;
+    padding: 10px 0 10px 40px;
+    background-image: url(../images/boisko.jpg);
+    font-size: 50px;
+    color: #ffffff;
+}
+header h2{
+    display: flex;
+    align-items: center;
+}
+#time{
+    padding: 20px;
+    font-size: 30px;
+    font-weight: bold;
+}
+.left-side{
+    background-color: #000000;
+    float: left;
+    margin-top: 100px;
+    margin-left: 30px;
+    width: 400px;
+    height: 470px;
+    padding: 10px;
+    border-radius: 0 100px;
+
+}
+.right-side{
+    background-color: #000000;
+    float: left;
+    margin-top: 100px;
+    margin-left: 55px;
+    width: 330px;
+    height: 470px;
+    padding: 10px;
+    border-radius: 100px 0 ;
+
+}
+.main
+{
+    background-color: #bcbcbc;
+    width: 1000px;
+    overflow: hidden;
+    margin-left: 55px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    border-radius: 30px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 25px;
+    font-weight: 600;
+    word-spacing: 8px;
+}
+.menu
+{
+    width: 100%;
+    background: #1F2232;
+    text-align: center;
+    border-top: 2px solid #751b1b;
+    border-bottom: 2px solid #751b1b;
+
+}
+.active{
+    background-color: #ffffff;
+}
+ol
+{
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+    font-size: 20px;
+    height: 45px;
+    width: 100%;
+    line-height: 250%;
+    display: inline-block;
+}
+ 
+ol a
+{
+    font-weight: bold;
+    color: #ffffff;
+    text-decoration: none;
+    display: block;
+}
+ol > li
+{
+    float: left;
+    width: 20%;
+    height: 50px;
+    border-right: 2px solid #520909;
+}
+ol > li:hover
+{
+    background-color: #520909;
+}
+ol > li > ul
+{
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    height: 40px;
+    display: none;
+}
+ol > li:hover > ul
+{
+    display: block;
+    position: relative;
+}
+ol > li > ul > li
+{
+    background-color:#1F2232;
+    position: relative;
+    z-index: 100;
+    border-top: 2px solid #520909;
+}
+
+ol > li > ul > li:hover
+{
+    background-color: #520909;
+}
+ol > li > ul > li:hover > a
+{
+    color: #ffffff;
+}
+
+.active{
+    background-color: #350606;
+}
+article{
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+article h1{
+    text-align: center;
+    margin: 0 10% 50px 10%;
+    border-bottom: 5px solid rgb(174, 222, 2);
+    padding-bottom: 20px;
+    font-size: 30px;
+    font-family:'Times New Roman', Times, serif;
+    font-weight:900;
+    
+}
+img.left{
+    float: left;
+    padding: 0 10px 10px 10px;
+    border-radius: 40px;
+}
+article p{
+    text-align: justify;
+    padding: 0 10px 10px 10px;
+    font-size: 19px;
+}
+img.right{
+    float: right;
+    padding: 10px 10px 10px 10px;
+    border-radius: 40px;
+}
+.base-main{
+    display: flex;
+    justify-content: space-around;
+}
+img.right-bar{
+    border-radius: 90px 0 ;
+}
+img.left-bar{
+    border-radius: 0 90px;
+}
+/*------------------KONTAKT--------------------*/
+.kontakt-box
+{
+    width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #fff;
+    box-shadow: 0 0 20px 0 #999;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    text-align: center;
+}
+.nazwa
+{
+    text-align: center;
+}
+.form
+{
+    margin: 35px;
+}
+.input
+{
+    width: 400px;
+    height: 40px;
+    margin-top: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border: 2px solid black;
+    border-radius: 14px;
+    outline: none;
+    
+}
+.inputwiadomosc
+{
+    min-height: 300px;
+    min-width: 400px;
+    max-width: 400px;
+    max-height:300px ;
+    margin-top: 30px;
+}
+.btn
+{
+    border-radius: 14px;
+    color: #fff;
+    margin-top: 18px;
+    padding: 10px;
+    background-color: #47c35a;
+    font-size: 10px;
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+/*-------------------REPREZENTACJA------------------------*/
+.container2{
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.main2{
+    background-color: #ffffff;
+    width: 50%;
+    overflow: hidden;
+    float: left;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+}
+article p{
+    text-align: justify;
+    font-size: 18px;
+    padding: 10px;
+}
+article{
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+img.left2{
+    float: right;
+    padding: 0 0 0 20px;
+}
+/*------------FILMY----------------*/
+.header2{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.header2 h2{
+    text-align: center;
+}
+.img2{
+    padding: 15px;
+}
