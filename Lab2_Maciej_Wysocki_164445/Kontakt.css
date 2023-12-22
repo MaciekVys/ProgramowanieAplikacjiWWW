@@ -1,0 +1,56 @@
+body
+{
+    background-color: rgb(183, 183, 183);
+}
+.kontakt-box
+{
+    width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #fff;
+    box-shadow: 0 0 20px 0 #999;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    text-align: center;
+}
+.nazwa
+{
+    text-align: center;
+}
+.form
+{
+    margin: 35px;
+}
+.input
+{
+    width: 400px;
+    height: 40px;
+    margin-top: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border: 2px solid black;
+    border-radius: 14px;
+    outline: none;
+    
+}
+.inputwiadomosc
+{
+    min-height: 300px;
+    min-width: 400px;
+    max-width: 400px;
+    max-height:300px ;
+    margin-top: 30px;
+}
+.btn
+{
+    border-radius: 14px;
+    color: #fff;
+    margin-top: 18px;
+    padding: 10px;
+    background-color: #47c35a;
+    font-size: 10px;
+    border: 1px solid black;
+    cursor: pointer;
+}

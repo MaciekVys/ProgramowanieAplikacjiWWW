@@ -1,0 +1,80 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    box-sizing: border-box;
+}
+body
+{   
+    background-image: url(boisko.jpg);
+}
+#kontener
+{
+    box-sizing: border-box;
+    overflow: hidden;
+    max-width: 1000px;
+    margin: 0 auto 0 auto;
+    background-color:  #eee;
+    height: 1000px;
+}
+header img{
+    display: block;
+}
+h2{
+    text-align: center;
+    padding: 10px 0 10px 0;
+    background-color: #eee;
+    font-size: 50px;
+}
+nav{
+    overflow: hidden;
+}
+nav a{
+    display: block;
+    width: 20%;
+    float: left;
+    text-align: center;
+    text-decoration: none;
+    color:crimson;
+    font-weight: bold;
+    background-color: #eee;
+    padding: 15px 30px;
+    border-bottom: 2px solid black;
+    border-top: 2px solid black;
+}
+a.menu:hover{
+    background-color: rgb(75, 75, 75);
+
+}
+article{
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+article h1{
+    text-align: center;
+    margin: 0 10% 50px 10%;
+    border-bottom: 5px solid rgb(174, 222, 2);
+    padding-bottom: 20px;
+    
+}
+img.left{
+    float: left;
+    padding: 0 10px 10px 10px;
+    border-radius: 40px;
+}
+article p{
+    text-align: justify;
+    padding: 0 10px 10px 10px;
+    font-size: 19px;
+}
+img.right{
+    float: right;
+    padding: 10px 10px 10px 10px;
+    border-radius: 40px;
+}
+.active{
+    background-color: rgb(75, 75, 75);
+}
+.buttoms{
+    text-align: center;
+}

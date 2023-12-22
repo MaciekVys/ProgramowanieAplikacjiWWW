@@ -1,0 +1,41 @@
+body
+{
+    background-color: #eee;
+    width: 100%;
+    justify-content: space-around;
+}
+.name
+{
+    font-size: 40px;
+    text-align: center;
+    font-weight: bold;
+    color: black;
+}
+.box
+{
+    margin-left: auto;
+    margin-right: auto;
+    width: 1000px;
+}
+.zdjecie
+{
+
+    margin: 5px;
+    width: 170px;
+    background: white;
+    padding: 5px;
+    border-radius: 10px;
+    border: 1px solid black;
+    text-align: center;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    font-weight: bold;
+    margin-top: 10px;
+    display: inline-block;
+}
+.zdjecie img
+{
+    width: 150px;
+    flex-basis: 100%;
+    border-radius: 10px;
+}
