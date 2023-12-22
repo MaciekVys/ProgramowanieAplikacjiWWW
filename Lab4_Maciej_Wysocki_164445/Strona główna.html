@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta http-equiv="Content-Language" content="pl" />
+    <meta name="Author" content="Maciej Wysocki" />
+    <link rel="stylesheet" href="jsquery.css" type="text/css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="kolorujtlo.js" type="text/javascript"></script>
+    <script src="timedate.js" type="text/javascript"></script>
+    <title>Football</title>
+</head>
+<body onload="startclock()">
+    
+    <div id="zegarek"></div>
+    <div id="data"></div>
+
+    <header>
+        <h2>Trochę o piłce nożnej</h2>
+    </header>
+    <nav>
+        <a class="menu active" href="menu.html">Menu</a>
+        <a class="menu" href="kontakt.html">Kontakt</a>
+        <a class="menu" href="galeria_zdjec.html">Legendy piłki</a>
+        <a class="menu" href="historia.html">Historia piłki</a>
+        <a class="menu" href="ligi.html">Ligi</a>
+    </nav>
+    <div id="kontener">
+        <form class="buttoms" method="post" name="background">
+            <input type="button" value="Yellow" onclick="changeBackground('#FFF000')">
+            <input type="button" value="Black" onclick="changeBackground('#000000')">
+            <input type="button" value="White" onclick="changeBackground('FFFFFF')">
+            <input type="button" value="Green" onclick="changeBackground('00FF00')">
+            <input type="button" value="Blue" onclick="changeBackground('0000FF')">
+            <input type="button" value="Orange" onclick="changeBackground('FF8000')">
+            <input type="button" value="Gray" onclick="changeBackground('c0c0c0')">
+            <input type="button" value="Red" onclick="changeBackground('FF0000')">
+        </form>
+        <section>
+            <article>
+                <h1>Moja pasja to piłka nożna</h1>
+                <p><img class="left" width="260" height="300" src="pilka.jpg">Piłka nożna (futbol, ang. football, association football, soccer) – gra zespołowa,
+                    w której dwie drużyny starają się zdobyć w określonym czasie jak najwięcej
+                    punktów poprzez wbicie piłki do bramki przeciwnika,
+                    najpopularniejsza dyscyplina sportowa z około 4 miliardami fanów na całym świecie.
+                    Od 1900 dyscyplina olimpijska. Na całym świecie w 2009 w rozgrywkach udział brało 265 milionów zawodników i zawodniczek oraz 5 milionów sędziów należących do 206 lokalnych związków zrzeszonych w FIFA. 
+                    W meczach piłkarskich uczestniczą dwie rywalizujące ze sobą drużyny. Celem gry jest umieszczenie piłki w bramce przeciwnika. 
+                    Zwycięża drużyna, która w regulaminowym czasie gry (dwie połowy po 45 minut każda w rozgrywkach seniorów) zdobędzie więcej bramek. Mecze piłkarskie odbywają się na prostokątnym, pokrytym murawą boisku. 
+                    Rozmiary boiska to 45 do 90 m szerokości i od 90 do 120 m długości, lecz boisko nie może być kwadratowe. 
+                    Od 14 marca 2008 każde nowe boisko powinno mieć 105 metrów długości i 68 metrów szerokości. 
+                    Decyzję tę przyjął Komitet Wykonawczy FIFA na podstawie przepisów opracowanych przez IFAB instytucję odpowiedzialną za przepisy gry w piłkę nożną.
+                    Drużyna piłkarska składa się z 11 zawodników (aby zespół został dopuszczony do meczu musi być ich co najmniej 7) i zazwyczaj 7 rezerwowych (w finałach mistrzostw świata i mistrzostw Europy – 12). 
+                    Wśród graczy wyróżniamy bramkarza 
+                    <img class="right" width="300" height="320" src="pilkarz.png">
+                    i graczy z pola: obrońców, pomocników i napastników. Podział graczy z pola na pozycje jest czysto umowny, w aktualnie stosowanych strategiach gry często następuje podczas meczu płynna wymiana między nimi. 
+                    Bramkarz jest jedynym zawodnikiem, który może dotykać i łapać piłkę rękami w czasie gry, jednak zgodnie z przepisami może to mieć miejsce jedynie we własnym polu karnym.
+                    W przypadku rozmyślnego zagrania piłki ręką przez bramkarza poza własnym polem karnym, jego drużyna zostaje ukarana rzutem wolnym bezpośrednim (zobacz Wykroczenia i kary), tak samo jak w przypadku pozostałych zawodników. 
+                    Wbrew powszechnie panującej opinii, ukaranie bramkarza za rozmyślne zagranie piłki ręką w czasie gry poza własnym polem karnym karą indywidualną w postaci żółtej lub czerwonej kartki, może mieć miejsce jedynie w ściśle określonych w przepisach gry sytuacjach. 
+                    Bramkarzowi nie wolno zagrywać piłki ręką po podaniu jej do 
+                    niego przez współpartnera z wrzutu oraz po podaniu od współpartnera nogą, jednak jeśli intencją zawodnika z drużyny nie było podanie piłki do bramkarza, a wynikło to z przypadku, w takiej sytuacji bramkarz może zagrywać ręką, nieważne, którą częścią ciała zagrał współpartner.
+                </p>
+            </article>
+        </section>  
+        <div id="animacjaTestowa1" class="test-block"> Kliknij, a się powiększy</div>
+        <script>
+            $("#animacjaTestowa1").on("click", function(){
+                $(this).animate({
+                    width:"500px",
+                    opacity: 0.4,
+                    fontSize: "3em",
+                    borderWidth: "10px",
+                }, 1500);
+            });
+        </script>
+    <div id="animacjaTestowa2" class="test-block"> Najedz kursorem, a się powiększe</div>
+        <script>
+            $("#animacjaTestowa2").on({
+                "mouseover" : function(){
+                    $(this).animate({
+                        width:300
+                    }, 800);
+                },
+                "mouseout" : function(){
+                    $(this).animate({
+                        width:200
+                    }, 800);
+                }
+            });
+        </script>
+    <div id="animacjaTestowa3" class="test-block"> Kliknij, abym urósł</div>
+        <script>
+            $("#animacjaTestowa3").on("click", function(){
+                if (!$(this).is(":animated")){
+                    $(this).animate({
+                        width: "+=" + 50,
+                        height: "+=" + 10,
+                        opacity: "-=" + 0.1,
+                        duration: 3000
+                    });
+                }
+            });
+        </script>
+
+</body>
