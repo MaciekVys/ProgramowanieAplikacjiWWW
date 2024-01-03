@@ -1,8 +1,37 @@
 <?php
 include_once '../cfg.php';
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+
+session_start();
+
+if (isset($_POST['login_email']) && isset($_POST['login_pass'])) {
+    if ($_POST['login_email'] == $login && $_POST['login_pass'] == $pass) {
+        $_SESSION['zalogowany'] = true;
+    } else {
+        echo 'Błędny login lub hasło';
+    }
+}
+
+// Obsługa formularza edycji
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
+    EdytujPodstrone($_POST['id']);
+}
+
+// Obsługa formularza dodawania
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_dodaj'])) {
+    DodajNowaPodstrone();
+}
+
+// Obsługa usuwania
+if (isset($_GET['delete_id'])) {
+    UsunPodstrone($_GET['delete_id']);
+}
+
+// Wyświetlanie Panelu Admina lub Formularza Logowania
+if (isset($_SESSION['zalogowany']) && $_SESSION['zalogowany'] === true) {
+    PokazPanelAdmina();
+} else {
+    echo FormularzLogowania();
+}
 
 function FormularzLogowania()
 {
@@ -33,10 +62,15 @@ function ListaPodstron() {
     echo '<div class="lista-podstron">';
     echo '<ul>';
     while ($row = mysqli_fetch_assoc($result)) {
+        $id = htmlspecialchars($row['id']);
+        $title = htmlspecialchars($row['page_title']);
+
         echo '<li>';
-        echo "ID: " . htmlspecialchars($row['id']) . " - Tytuł: " . htmlspecialchars($row['page_title']);
-        echo " <a href='edytuj_podstrone.php?id=" . $row['id'] . "'>Edytuj</a>"; // Przykładowy link do edycji
-        echo " <a href='usun_podstrone.php?id=" . $row['id'] . "' onclick='return confirm(\"Czy na pewno chcesz usunąć?\")'>Usuń</a>"; // Link do usunięcia z potwierdzeniem
+        echo "$id - Tytuł: $title ";
+        // Przycisk edytowania
+        echo "<a href='admin.php?edit_id=$id'>Edytuj</a> ";
+        // Przycisk usuwania
+        echo "<a href='admin.php?delete_id=$id' onclick='return confirm(\"Czy na pewno chcesz usunąć tę podstronę?\")'>Usuń</a>";
         echo '</li>';
     }
     echo '</ul>';
@@ -45,67 +79,123 @@ function ListaPodstron() {
     mysqli_close($conn);
 }
 
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Pobierz dane z formularza
+    $id = $_POST['id'];
+    $tytul = $_POST['page_title'];
+    $tresc = $_POST['page_content'];
+    $aktywna = isset($_POST['aktywna']) ? 1 : 0;
 
-
-function EdytujPodstrone($id) {
-    $conn = db_connect(); // Funkcja połączenia z bazą danych
-    $query = "UPDATE page_list SET tytul = ?, tresc = ? WHERE id = ? LIMIT 1";
+    // Aktualizuj dane w bazie
+    $conn = db_connect();
+    $query = "UPDATE page_list SET page_title = ?, page_content = ?, status = ? WHERE id = ?";
     
     if ($stmt = $conn->prepare($query)) {
-        $stmt->bind_param("ssi", $tytul, $tresc, $id);
+        $stmt->bind_param("ssii", $tytul, $tresc, $aktywna, $id);
         $stmt->execute();
         $stmt->close();
-        echo "Podstrona została zaktualizowana.";
+
+        // Przekieruj z powrotem do panelu admina lub wyświetl komunikat
+        header("Location: admin.php"); // Przykładowe przekierowanie
+        exit;
     } else {
         echo "Błąd podczas aktualizacji podstrony.";
     }
 
     $conn->close();
-
-    echo "<form method='post' action='edytuj_podstrone_skrypt.php'>";  // Ustaw odpowiednią akcję
-    echo "<input type='hidden' name='id' value='$id'>";
-    echo "<p>Tytuł: <input type='text' name='page_title' value='$page_title'></p>";
-    echo "<p>Treść: <textarea name='page_content'>$page_content</textarea></p>";
-    echo "<p>Aktywna: <input type='checkbox' name='aktywna' ".($aktywna ? "checked" : "")."></p>";
-    echo "<p><input type='submit' value='Zapisz zmiany'></p>";
-    echo "</form>";
-
-    mysqli_close($conn);
 }
 
-function DodajNowaPodstrone() {
-    $conn = db_connect(); // Funkcja połączenia z bazą danych
-    $query = "INSERT INTO page_list (page_title, page_content) VALUES (?, ?)";
-    
-    if ($stmt = $conn->prepare($query)) {
-        $stmt->bind_param("ss", $tytul, $tresc);
-        $stmt->close();
-        echo "Podstrona została dodana.";
-    } else {
-        echo "Błąd podczas dodawania podstrony.";
-    }
+function EdytujPodstrone($id) {
+    $conn = db_connect();
+    $query = "SELECT page_title, page_content, status FROM page_list WHERE id = ? LIMIT 1";
 
-    $conn->close();
-
-    echo '
-    <form method="post" action="'.htmlspecialchars($_SERVER["PHP_SELF"]).'">
-        <label for="tytul">Tytuł:</label><br>
-        <input type="text" id="tytul" name="tytul"><br>
-        <label for="tresc">Treść:</label><br>
-        <textarea id="tresc" name="tresc"></textarea><br>
-        <input type="submit" value="Dodaj podstronę">
-    </form>
-    ';
-}
-function UsunPodstrone($id) {
-    $conn = db_connect(); // Funkcja połączenia z bazą danych
-    $query = "DELETE FROM page_list WHERE id = ? LIMIT 1";
-    
     if ($stmt = $conn->prepare($query)) {
         $stmt->bind_param("i", $id);
         $stmt->execute();
+        $stmt->bind_result($page_title, $page_content, $aktywna);
+        $stmt->fetch();
+
+        echo "<form method='post' action=''>";
+        echo "<input type='hidden' name='id' value='$id'>";
+        echo "<p>Tytuł: <input type='text' name='page_title' value='$page_title'></p>";
+        echo "<p>Treść: <textarea name='page_content'>$page_content</textarea></p>";
+        echo "<p>Aktywna: <input type='checkbox' name='aktywna' ".($aktywna ? "checked" : "")."></p>";
+        echo "<p><input type='submit' value='Zapisz zmiany'></p>";
+        echo "</form>";
+
         $stmt->close();
+    } else {
+        echo "Błąd podczas aktualizacji podstrony.";
+    }
+
+    $conn->close();
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_dodaj'])) {
+    $tytul = $_POST['tytul'];
+    $tresc = $_POST['tresc'];
+
+    if (empty($tytul) || empty($tresc)) {
+        echo "Tytuł i treść są wymagane.";
+    } else {
+        $conn = db_connect();
+        $query = "INSERT INTO page_list (page_title, page_content) VALUES (?, ?)";
+
+        if ($stmt = $conn->prepare($query)) {
+            $stmt->bind_param("ss", $tytul, $tresc);
+            if ($stmt->execute()) {
+                echo "Podstrona została dodana.";
+                header("Location: admin.php"); // Opcjonalne przekierowanie
+                exit;
+            } else {
+                echo "Błąd przy dodawaniu rekordu: " . $stmt->error;
+            }
+            $stmt->close();
+        } else {
+            echo "Błąd przy przygotowaniu zapytania: " . $conn->error;
+        }
+        $conn->close();
+    }
+}
+
+function DodajNowaPodstrone() {
+    $tytul = $_POST['tytul'];
+    $tresc = $_POST['tresc'];
+    $alias = $_POST['alias'];
+
+    if (empty($tytul) || empty($alias) || empty($tresc)) {
+        echo "Tytuł, alias i treść są wymagane.";
+        return;
+    }
+
+    $conn = db_connect();
+    $query = "INSERT INTO page_list (page_title, alias, page_content) VALUES (?, ?, ?)";
+    $stmt = $conn->prepare($query);
+    if ($stmt) {
+        $stmt->bind_param("sss", $tytul, $alias, $tresc);
+        if ($stmt->execute()) {
+            echo "Podstrona została dodana.";
+            header("Location: admin.php");
+            exit;
+        } else {
+            echo "Błąd przy dodawaniu rekordu: " . $stmt->error;
+        }
+        $stmt->close();
+    } else {
+        echo "Błąd przy przygotowaniu zapytania: " . $conn->error;
+    }
+    $conn->close();
+}
+
+function UsunPodstrone($id) {
+    $conn = db_connect();
+    $query = "DELETE FROM page_list WHERE id = ? LIMIT 1";
+
+    if ($stmt = $conn->prepare($query)) {
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
         echo "Podstrona została usunięta.";
+        $stmt->close();
     } else {
         echo "Błąd podczas usuwania podstrony.";
     }
@@ -113,91 +203,29 @@ function UsunPodstrone($id) {
     $conn->close();
 }
 
-session_start();
-
-if (isset($_POST['login']) && isset($_POST['pass'])) {
-    
-    if ($_POST['login'] == $login && $_POST['pass'] == $pass) {
-        $_SESSION['loggedin'] = true;
-        echo 'Zalogowano pomyślnie';
-        // Tutaj kod do wywołania dalszych metod administracyjnych
-    } else {
-        echo 'Błędny login lub hasło';
-        FormularzLogowania();
-    }
-} else {
-    FormularzLogowania();
-}
-
-?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta http-equiv="Content-type" content="text/html; charset=UTF-8"/>
-    <link rel="stylesheet" href="../css/style.css">
-    <meta http-equiv="Content-Language" content="pl"/>
-    <meta name="Author" content="Patryk Bachanek"/>
-    <title>Admin panel</title>
-</head>
-<body>
-<?php
-
-if ($_SESSION['zalogowany'] === true) {
+function PokazPanelAdmina() {
+    echo "<h1>Panel Administratora</h1>";
     ListaPodstron();
-    echo '<form method="post"><input type="submit" name="Dodaj" value="Dodaj"></form>';
-    if (isset($_POST['Dodaj'])) {
-        DodajNowaPodstrone();
+    
+    if (isset($_GET['edit_id'])) {
+        $edit_id = $_GET['edit_id'];
+        EdytujPodstrone($edit_id);
     }
-    if (isset($_POST['update'])) {
-        $id = $_POST['id_to_update'];
-        EdytujPodstrone($id);
+
+    if (isset($_GET['delete_id'])) {
+        $delete_id = $_GET['delete_id'];
+        UsunPodstrone($delete_id);
     }
-    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save'])) {
-        $id = $_POST['id_to_update'];
-        $title = $_POST['title'];
-        $content = $_POST['content'];
-        $status = isset($_POST["status"]) ? 1 : 0;
-        $conn = db_connect();
-        $stmt = $conn->prepare("UPDATE page_list SET page_title = ?, page_content = ?, status = ? WHERE id = ? LIMIT 1");
 
-        $stmt->bind_param('ssii', $title, $content, $status, $id);
-        $stmt->execute();
-
-        if ($stmt->affected_rows > 0) {
-            echo 'Zmiany zostały wprowadzone';
-            header("Location: " . $_SERVER['PHP_SELF']);
-            exit();
-        } else {
-            echo 'Brak zmian do zapisania';
-        }
-        $conn->close();
-    }
-    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['DodajNowaPodstrone'])) {
-        $nowyTytul = $_POST["nowyTytul"];
-        $nowaZawartosc = $_POST["nowaZawartosc"];
-
-        $conn = db_connect();
-        $stmt = $conn->prepare("INSERT INTO page_list (page_title, page_content, status) VALUES (?, ?, ?)");
-
-        $statusNowejPodstrony = 1; // Domyślnie ustaw na aktywną, możesz dostosować według potrzeb
-
-        $stmt->bind_param('ssi', $nowyTytul, $nowaZawartosc, $statusNowejPodstrony);
-        $stmt->execute();
-        if ($stmt->affected_rows > 0) {
-            echo 'Nowa podstrona została dodana.';
-            header("Location: " . $_SERVER['PHP_SELF']);
-            exit();
-        } else {
-            echo 'Błąd podczas dodawania nowej podstrony.';
-        }
-        $conn->close();
-    }
-    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
-        $idToDelete = $_POST['id_to_update'];
-        UsunPodstrone($idToDelete);
-    }
+    echo '
+    <form action="admin.php" method="post" style="text-align: center">
+        <label for="tytul">Tytuł:</label><br>
+        <input type="text" id="tytul" name="tytul"><br>
+        <label for="alias">Alias:</label><br> <!-- Dodane pole dla aliasu -->
+        <input type="text" id="alias" name="alias"><br>
+        <label for="tresc">Treść:</label><br>
+        <textarea id="tresc" name="tresc"></textarea><br>
+        <input type="submit" name="submit_dodaj" value="Dodaj podstronę">
+    </form>';
+    
 }
-
-?>
-</body>
-</html>
