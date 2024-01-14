@@ -1,12 +1,24 @@
 <?php
-function Show($id,$conn) {
+/**
+ * Wyświetla treść strony na podstawie jej ID.
+ */
+function Show($id, $conn) {
+    // Sanitizacja ID strony dla bezpieczeństwa
     $id_clear = htmlspecialchars($id);
 
-    $query = "SELECT * FROM page_list WHERE id='$id_clear' LIMIT 1";
-    $result = mysqli_query($conn, $query);
+    // Przygotowanie zapytania SQL
+    $query = "SELECT * FROM page_list WHERE id = ? LIMIT 1";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $id_clear);
 
-    $row = mysqli_fetch_array($result);
+    // Wykonanie zapytania
+    $stmt->execute();
+    $result = $stmt->get_result();
 
+    // Pobranie wyniku
+    $row = $result->fetch_array();
+
+    // Sprawdzenie, czy strona istnieje
     if (empty($row['id'])) {
         $web = '[nie_znaleziono_strony]';
     } else {
@@ -15,3 +27,4 @@ function Show($id,$conn) {
 
     return $web;
 }
+?>

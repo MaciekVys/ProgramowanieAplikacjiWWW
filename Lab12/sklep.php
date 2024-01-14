@@ -1,113 +1,103 @@
 <?php
-include 'cfg.php';
 
-// Sprawdź, czy jest żądanie edycji
-$edytujId = isset($_GET['edytuj_id']) ? $_GET['edytuj_id'] : null;
-$edytowanaKategoria = null;
-if ($edytujId) {
-    $conn = db_connect();
-    $stmt = $conn->prepare("SELECT nazwa, matka FROM sklep WHERE id = ?");
-    $stmt->bind_param("i", $edytujId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result->num_rows > 0) {
-        $edytowanaKategoria = $result->fetch_assoc();
-    }
-    $stmt->close();
-}
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (isset($_POST['nazwa']) && !$edytujId) {
-        DodajKategorie($_POST['nazwa']);
-    } elseif (isset($_POST['edytuj_id'])) {
-        EdytujKategorie($_POST['edytuj_id'], $_POST['nowaNazwa'], $_POST['nowaMatka']);
-    }
-    header('Location: sklep.php');
-    exit();
-}
-
-if (isset($_GET['usun_id'])) {
-    UsunKategorie($_GET['usun_id']);
-    header('Location: sklep.php');
-    exit();
-}
+include_once 'cfg.php';
 
 function DodajKategorie($nazwa, $matka = 0) {
     $conn = db_connect();
-    $stmt = $conn->prepare("INSERT INTO sklep (nazwa, matka) VALUES (?, ?)");
-    $stmt->bind_param("si", $nazwa, $matka);
-    $stmt->execute();
-    $stmt->close();
-    $conn->close(); 
+    $stmt = $conn->prepare("INSERT INTO kategorie (nazwa, matka) VALUES (?, ?)");
+    if ($stmt) {
+        $stmt->bind_param("si", $nazwa, $matka);
+        $stmt->execute();
+        $stmt->close();
+    } else {
+        echo "Błąd przy przygotowaniu zapytania: " . $conn->error;
+    }
+    $conn->close();
 }
 
 function UsunKategorie($id) {
     $conn = db_connect();
-    $stmt = $conn->prepare("DELETE FROM sklep WHERE id = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $stmt->close();
-}
-
-function EdytujKategorie($id, $nowaNazwa, $nowaMatka = 0) {
-    $conn = db_connect();
-    $stmt = $conn->prepare("UPDATE sklep SET nazwa = ?, matka = ? WHERE id = ?");
-    $stmt->bind_param("sii", $nowaNazwa, $nowaMatka, $id);
-    $stmt->execute();
-    $stmt->close();
-}
-
-function PokazKategorie($matka = 0, $poziom = 0) {
-    $conn = db_connect();
-    $stmt = $conn->prepare("SELECT id, nazwa FROM sklep WHERE matka = ?");
-    $stmt->bind_param("i", $matka);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    while($row = $result->fetch_assoc()) {
-        echo str_repeat(" - ", $poziom) . $row["nazwa"] . " <a href='sklep.php?edytuj_id=" . $row["id"] . "'>Edytuj</a> <a href='sklep.php?usun_id=" . $row["id"] . "'>Usuń</a><br>";
-        PokazKategorie($row["id"], $poziom + 1);
+    $stmt = $conn->prepare("DELETE FROM kategorie WHERE id = ?");
+    if ($stmt) {
+        $stmt->bind_param("i", $id);
+        if ($stmt->execute()) {
+            echo "Kategoria została usunięta.";
+        } else {
+            echo "Błąd przy usuwaniu kategorii: " . $stmt->error;
+        }
+        $stmt->close();
+    } else {
+        echo "Błąd przy przygotowaniu zapytania: " . $conn->error;
     }
-    $stmt->close();
+    $conn->close();
 }
 
-// Sprawdź, czy jest żądanie edycji
-$edytujId = isset($_GET['edytuj_id']) ? $_GET['edytuj_id'] : null;
-$edytowanaKategoria = null;
-if ($edytujId) {
+function EdytujKategorie($id, $nowaNazwa, $nowaMatka) {
     $conn = db_connect();
-    $stmt = $conn->prepare("SELECT nazwa, matka FROM sklep WHERE id = ?");
-    $stmt->bind_param("i", $edytujId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result->num_rows > 0) {
-        $edytowanaKategoria = $result->fetch_assoc();
+    $stmt = $conn->prepare("UPDATE kategorie SET nazwa = ?, matka = ? WHERE id = ?");
+    if ($stmt) {
+        $stmt->bind_param("sii", $nowaNazwa, $nowaMatka, $id);
+        $stmt->execute();
+        $stmt->close();
+    } else {
+        echo "Błąd przy przygotowaniu zapytania: " . $conn->error;
     }
-    $stmt->close();
+    $conn->close();
+}
+function GenerujDrzewoKategorii($matka = 0, $indent = 0)
+{
+    $conn = db_connect();
+    $stmt = $conn->prepare("SELECT * FROM kategorie WHERE matka = ?");
+    if ($stmt) {
+        $stmt->bind_param("i", $matka);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        while ($row = $result->fetch_assoc()) {
+            echo str_repeat("&nbsp;&nbsp;", $indent); // Ustawia odpowiednią ilość spacji dla wcięcia
+            echo "Kategoria: {$row['nazwa']}<br>";
+
+            // Wywołaj rekurencyjnie funkcję dla podkategorii
+            GenerujDrzewoKategorii($row['id'], $indent + 1);
+        }
+        $stmt->close();
+    } else {
+        echo "Błąd przy przygotowaniu zapytania: " . $conn->error;
+    }
+    $conn->close();
+}
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_dodaj_kategorie'])) {
+    $nazwaKategorii = $_POST['nazwa_kategorii'];
+    $matkaKategorii = $_POST['matka_kategorii'];
+    DodajKategorie($nazwaKategorii, $matkaKategorii);
+
+}
+
+function FormularzDodajKategorie(){
+    $wynik = 
+    '<form action="admin.php" method="post">
+        Nazwa Kategorii: <input type="text" name="nazwa_kategorii" />
+        ID Kategorii Nadrzędnej (0 dla kategorii głównej): <input type="number" name="matka_kategorii" value="0" />
+        <input type="submit" name="submit_dodaj_kategorie" value="Dodaj Kategorię" />
+    </form>';
+    return $wynik;
+}
+function FormularzEdytujKategorie(){
+    $wynik = 
+    '<form action="admin.php" method="post">
+        ID Kategorii: <input type="number" name="edytuj_id_kategorii" />
+        Nowa Nazwa Kategorii: <input type="text" name="nowa_nazwa_kategorii" />
+        Nowa ID Kategorii Nadrzędnej: <input type="number" name="nowa_matka_kategorii" />
+        <input type="submit" name="submit_edytuj_kategorie" value="Edytuj Kategorię" />
+    </form>';
+    return $wynik;
+}
+function FormularzUsunKategorie(){
+    $wynik = 
+    '<form action="admin.php" method="post">
+        ID Kategorii do Usunięcia: <input type="number" name="usun_id_kategorii" />
+        <input type="submit" name="submit_usun_kategorie" value="Usuń Kategorię" />
+    </form>';
+    return $wynik;
 }
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Zarządzanie Kategoriami</title>
-</head>
-<body>
-    <h1>Zarządzanie Kategoriami</h1>
-    <?php if ($edytujId && $edytowanaKategoria): ?>
-        <form action="sklep.php?edytuj_id=<?php echo $edytujId; ?>" method="post">
-            <input type="hidden" name="edytuj_id" value="<?php echo $edytujId; ?>">
-            Nazwa Kategorii: <input type="text" name="nowaNazwa" value="<?php echo $edytowanaKategoria['nazwa']; ?>">
-            Matka Kategorii: <input type="text" name="nowaMatka" value="<?php echo $edytowanaKategoria['matka']; ?>">
-            <input type="submit" value="Zaktualizuj Kategorię">
-        </form>
-    <?php else: ?>
-        <form action="sklep.php" method="post">
-            Nazwa Kategorii: <input type="text" name="nazwa">
-            <input type="submit" value="Dodaj Kategorię">
-        </form>
-    <?php endif; ?>
-    <hr>
-    <h2>Lista Kategorii</h2>
-    <?php PokazKategorie(); ?>
-</body>
-</html>
