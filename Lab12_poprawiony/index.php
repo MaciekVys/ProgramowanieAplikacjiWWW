@@ -12,23 +12,23 @@ error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
 // Wybór strony na podstawie parametru 'idp' przekazanego metodą GET
 if($_GET['idp'] == '') 
 {
-    $strona = Show(3, $conn);
+    $strona = Show(1, $conn);
 }
 if ($_GET['idp'] == 'kontakt') 
 {
-    $strona = Show(5, $conn);
+    $strona = Show(2, $conn);
 }
 if ($_GET['idp'] == 'Filmy') 
 {
+    $strona = Show(3, $conn);
+}
+if ($_GET['idp'] == 'Skrypty') 
+{
     $strona = Show(4, $conn);
 }
-if ($_GET['idp'] == 'Najelpsi z najlepszych') 
+if ($_GET['idp'] == 'Best Players') 
 {
-    $strona = Show(7, $conn);
-}
-if ($_GET['idp'] == 'Ligi') 
-{
-    $strona = Show(6, $conn);
+    $strona = Show(5, $conn);
 }
 ?>
 
@@ -57,9 +57,9 @@ if ($_GET['idp'] == 'Ligi')
         <ol> 
             <li><a href="index.php?idp=">Strona Główna</a></li>                         
             <li><a href="index.php?idp=kontakt">Kontakt</a></li>
-            <li><a href="index.php?idp=Najelpsi z najlepszych">Najlepsi z najlepszych</a></li>
+            <li><a href="index.php?idp=Skrypty">Skrypty</a></li>
             <li><a href="index.php?idp=Filmy">Filmy</a></li>
-            <li><a href="index.php?idp=Ligi">Ligi</a></li>               
+            <li><a href="index.php?idp=Best Players">Best Players</a></li>               
         </ol>
     </div>
     <?php

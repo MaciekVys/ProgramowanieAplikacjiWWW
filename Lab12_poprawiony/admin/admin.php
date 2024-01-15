@@ -109,15 +109,20 @@ function UsunPodstrone($id) {
     $conn->close();
 }
 
-// Sprawdzanie, czy użytkownik jest zalogowany
 if (isset($_POST['login_email']) && isset($_POST['login_pass'])) {
     if ($_POST['login_email'] == $login && $_POST['login_pass'] == $pass) {
         $_SESSION['zalogowany'] = true;
     } else {
         echo FormularzLogowania();
+        exit; // Zatrzymuje wykonanie dalszej części skryptu, jeśli dane logowania są niepoprawne
     }
 }
 
+// Jeśli użytkownik nie jest zalogowany, wyświetl formularz logowania
+if (!isset($_SESSION['zalogowany']) || $_SESSION['zalogowany'] !== true) {
+    echo FormularzLogowania();
+    exit; // Zatrzymuje wykonanie dalszej części skryptu, jeśli użytkownik nie jest zalogowany
+}
 // Obsługa wylogowania
 if (isset($_POST['wyloguj'])) {
     session_destroy();
@@ -371,10 +376,7 @@ if (isset($_GET['usun_id'])) {
     header("Location: admin.php");
     exit;
 }
-/**----------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-/**----------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-/**----------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-/**----------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+
 function addToCart($product_id, $quantity) {
     // Upewnij się, że sesja koszyka jest zainicjowana
     if (!isset($_SESSION['cart'])) {
@@ -470,29 +472,34 @@ function showCard() {
         $netPrice = $product['price'];
         $vatRate = isset($product['podatek_vat']) ? $product['podatek_vat'] : 0;
         $quantity = $product['quantity'];
-        
-        // Obliczenie ceny brutto dla jednego produktu
         $grossPrice = $netPrice * (1 + $vatRate / 100);
-        
-        // Obliczenie wartości pozycji z VAT
         $subtotalWithVAT = $grossPrice * $quantity;
-        $totalWithVAT += $subtotalWithVAT; // Dodanie do sumy całkowitej z VAT
+        $totalWithVAT += $subtotalWithVAT;
 
+                // Formularz do aktualizacji ilości produktu
         echo '<tr>';
         echo '<td>' . htmlspecialchars($product['name']) . '</td>';
         echo '<td>' . htmlspecialchars($product['price']) . ' zł</td>';
-        echo '<td>' . htmlspecialchars($product['quantity']) . '</td>';
-        echo '<td>' . htmlspecialchars($subtotalWithVAT) . ' zł</td>'; // Wyświetlenie wartości z VAT
         echo '<td>';
-        echo '<form method="post" action="">';
-        echo '<input type="hidden" name="remove_product_id" value="' . $product_id . '">';
+        echo '<form method="post" action="admin.php">';
+        echo '<input type="hidden" name="product_id" value="' . $product_id . '">';
+        echo '<input type="hidden" name="action" value="update">'; // Dodaj pole action z wartością "update"
+        echo '<input type="number" name="new_quantity" value="' . $quantity . '" min="0" style="width: 50px;">';
+        echo '<input type="submit" value="Aktualizuj">';
+        echo '</form>';
+        echo '</td>';
+        echo '<td>' . htmlspecialchars($subtotalWithVAT) . ' zł</td>';
+        echo '<td>';
+        echo '<form method="post" action="admin.php">';
+        echo '<input type="hidden" name="product_id" value="' . $product_id . '">';
+        echo '<input type="hidden" name="action" value="remove">'; // Dodaj pole action z wartością "remove"
         echo '<input type="submit" value="Usuń">';
         echo '</form>';
         echo '</td>';
         echo '</tr>';
+
     }
 
-    // Wyświetlenie całkowitej sumy koszyka z VAT
     echo '<tr><td colspan="4" style="text-align:right">Suma z VAT:</td><td>' . htmlspecialchars($totalWithVAT) . ' zł</td></tr>';
     echo '</table>';
 }
@@ -508,13 +515,62 @@ function removeFromCart($product_id) {
     }
 }
 
+function editCartItemQuantity($product_id, $new_quantity) {
+    if (!isset($_SESSION['cart'])) {
+        echo "Błąd: Koszyk nie istnieje.";
+        return;
+    }
+
+    if (!isset($_SESSION['cart'][$product_id])) {
+        echo "Błąd: Produkt nie istnieje w koszyku.";
+        return;
+    }
+
+    if (!is_numeric($new_quantity) || $new_quantity < 0) {
+        echo "Błąd: Niepoprawna ilość.";
+        return;
+    }
+
+    // Połączenie z bazą danych
+    $conn = db_connect();
+    
+    if ($conn) {
+        // Przygotowanie zapytania SQL, aby uniknąć iniekcji SQL
+        $stmt = $conn->prepare("SELECT ilosc FROM produkty WHERE id = ?");
+        if ($stmt) {
+            $stmt->bind_param("i", $product_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+
+                // Sprawdzenie dostępnej ilości produktu w bazie danych
+                $availableQuantity = $row['ilosc'];
+
+                // Sprawdzenie, czy nowa ilość nie przekracza dostępnej ilości
+                if ($new_quantity > $availableQuantity) {
+                    echo "Błąd: Nie można zaktualizować ilości produktu na większą niż dostępna ilość.";
+                    return;
+                } else {
+                    $_SESSION['cart'][$product_id]['quantity'] = $new_quantity;
+                    echo "Ilość produktu została zaktualizowana.";
+                }
+            } else {
+                echo "Błąd: Produkt o ID $product_id nie istnieje.";
+            }
+            $stmt->close();
+        } else {
+            echo "Błąd: Nie można przygotować zapytania.";
+        }
+        $conn->close();
+    } else {
+        echo "Błąd: Nie można połączyć się z bazą danych.";
+    }
+}
 
 
 
-/**----------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-/**----------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-/**----------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-/**----------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 
 ?>
 <!DOCTYPE html>
@@ -598,17 +654,20 @@ if (isset($_SESSION['zalogowany']) && $_SESSION['zalogowany'] === true) {
         $kategoria = $_POST['kategoria'];
         $gabaryt = $_POST['gabaryt'];
         $zdjecie = $_POST['zdjecie'];
-
+    
         // Wywołaj metodę aktualizującą produkt w bazie danych.
         $zarzadzajProduktami->EdytujProdukt($idProduktu, $tytul, $opis, $cena_netto, $podatek_vat, $ilosc, $status, $kategoria, $gabaryt, $zdjecie);
-
+    
         // Przekieruj z powrotem do strony admina, aby uniknąć powtórzenia operacji.
         header("Location: admin.php");
         exit;
     }
+    
 
 
     $zarzadzajKategoriami->PokazKategorie();
+
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST['product_id']) && isset($_POST['quantity'])) {
             $product_id = $_POST['product_id'];
@@ -632,13 +691,23 @@ if (isset($_SESSION['zalogowany']) && $_SESSION['zalogowany'] === true) {
         }
     }
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_product_id'])) {
-        $product_id_to_remove = $_POST['remove_product_id'];
-        removeFromCart($product_id_to_remove);
-        // Opcjonalnie możesz przekierować użytkownika z powrotem na stronę koszyka, aby odświeżyć widok
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (isset($_POST['action']) && $_POST['action'] == 'update' && isset($_POST['product_id']) && isset($_POST['new_quantity'])) {
+            // Aktualizacja ilości produktu w koszyku
+            $product_id = $_POST['product_id'];
+            $new_quantity = $_POST['new_quantity'];
+            editCartItemQuantity($product_id, $new_quantity);
+        } elseif (isset($_POST['action']) && $_POST['action'] == 'remove' && isset($_POST['product_id'])) {
+            // Usunięcie produktu z koszyka
+            $product_id = $_POST['product_id'];
+            removeFromCart($product_id);
+        }
+    
         header('Location: admin.php');
         exit;
     }
+    
+
 
     
     echo '
